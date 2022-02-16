@@ -11,6 +11,20 @@ jobs:
   build:
     name: Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: simple_bank
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
 
     - name: Check out code into the Go module directory
@@ -21,6 +35,9 @@ jobs:
       with:
         go-version: 1.17
       id: go
+
+    - name: Run migrations
+      run: make action=up migrate
 
     - name: Test
       run: make test
